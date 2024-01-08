@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Todo List App</title>
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f2f2f2;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    #app {
+        background-color: white;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        width: 300px;
+        border-radius: 8px;
+    }
+    #app header {
+        font-size: 1.2em;
+        margin-bottom: 20px;
+    }
+    #new-todo {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+    .todo {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .todo:last-child {
+        margin-bottom: 0;
+    }
+    .todo input[type="checkbox"] {
+        margin-right: 10px;
+    }
+    .todo label {
+        flex-grow: 1;
+    }
+    .todo button {
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+    .todo button:hover {
+        color: red;
+    }
+    .footer {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9em;
+        margin-top: 20px;
+    }
+    .footer button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #777;
+    }
+    .footer button:hover {
+        color: black;
+    }
+</style>
+</head>
+<body>
+<div id="app">
+    <header>
+        <input type="text" id="new-todo" placeholder="Type your todo list">
+        <button onclick="completeAllTasks()">Complete all tasks</button>
+        <button onclick="clearCompleted()">Clear completed</button>
+    </header>
+    <div id="todos"></div>
+    <div class="footer">
+        <span id="task-count">0 tasks left</span>
+        <div>
+            <button onclick="filterTodos('all')">All</button>
+            <button onclick="filterTodos('uncomplete')">Uncomplete</button>
+            <button onclick="filterTodos('completed')">Completed</button>
+        </div>
+    </div>
+</div>
+<script>
+// JavaScript to add functionality
+let todos = [];
+let filter = 'all';
+
+function addTodo(event) {
+    if (event.key !== 'Enter' || !this.value.trim()) return;
+    todos.push({ text: this.value, completed: false });
+    this.value = '';
+    renderTodos();
+}
+
+function deleteTodo(index) {
+    todos.splice(index, 1);
+    renderTodos();
+}
+
+function completeAllTasks() {
+    todos.forEach(todo => todo.completed = true);
+    renderTodos();
+}
+
+function clearCompleted() {
+    todos = todos.filter(todo => !todo.completed);
+    renderTodos();
+}
+
+function toggleCompletion(index) {
+    todos[index].completed = !todos[index].completed;
+    renderTodos();
+}
+
+function filterTodos(criteria) {
+    filter = criteria;
+    renderTodos();
+}
+
+function renderTodos() {
+    const todosContainer = document.getElementById('todos');
+    todosContainer.innerHTML = '';
+    const filteredTodos = todos.filter(todo => {
+        if (filter === 'completed') return todo.completed;
+        if (filter === 'uncomplete') return !todo.completed;
+        return true;
+    });
+    filteredTodos.forEach((todo, index) => {
+        const todoElement = document.createElement('div');
+        todoElement.className = 'todo';
+        todoElement.innerHTML = `
+            <input type="checkbox" id="todo-${index}" ${todo.completed ? 'checked' : ''} onchange="toggleCompletion(${index})">
+            <label for="todo-${index}">${todo.text}</label>
+            <button onclick="deleteTodo(${index})">&#10006;</button>
+        `;
+        todosContainer.appendChild(todoElement);
+    });
+    const tasksLeft = todos.filter(todo => !todo.completed).length;
+    document.getElementById('task-count').textContent = tasksLeft + ' tasks left';
+}
+
+document.getElementById('new-todo').addEventListener('keypress', addTodo);
+renderTodos();
+</script>
+</body>
+</html>
